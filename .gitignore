@@ -1,0 +1,5 @@
+# Ignore local test artifacts
+main_local_test
+*.o
+*.out
+*.exe
