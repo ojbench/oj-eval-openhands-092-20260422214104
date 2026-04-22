@@ -1,9 +1,14 @@
 #ifndef SRC_HPP
 #define SRC_HPP
 
-#include "fraction.hpp"
+#include <iostream>
+#include <string>
+#include <exception>
+#include <algorithm>
+#include <cstdlib>
 #include <vector>
 #include <utility>
+#include "fraction.hpp"
 
 // 如果你不需要使用 matrix 类，请将 IGNORE_MATRIX 改为 0
 // #define IGNORE_MATRIX 0
@@ -55,12 +60,10 @@ private:
         }
         for (int col = 0, row = 0; col < N && row < N; ++col, ++row) {
             int piv = row;
-            // find non-zero pivot
             for (int i = row; i < N; ++i) {
                 if (!(aug[i][col] == fraction(0))) { piv = i; break; }
             }
             if (aug[piv][col] == fraction(0)) {
-                // singular
                 throw resistive_network_error();
             }
             if (piv != row) std::swap(aug[piv], aug[row]);
@@ -85,7 +88,6 @@ public:
         n = interface_size_;
         m = connection_size_;
         edges.reserve(m);
-        // Build Laplacian L
         std::vector<std::vector<fraction>> L(n, std::vector<fraction>(n, fraction(0)));
         for (int k = 0; k < m; ++k) {
             int u = from[k];
@@ -97,7 +99,6 @@ public:
             L[u-1][v-1] = L[u-1][v-1] - g;
             L[v-1][u-1] = L[v-1][u-1] - g;
         }
-        // Build reduced matrix M by removing last row and column
         if (n >= 2) {
             M.assign(n-1, std::vector<fraction>(n-1, fraction(0)));
             for (int i = 0; i < n-1; ++i)
@@ -116,9 +117,7 @@ public:
         if (n <= 1) throw resistive_network_error();
         std::vector<fraction> bvec(n-1, fraction(0));
         if (a < n) bvec[a-1] = bvec[a-1] + fraction(1);
-        // current leaves at b
         if (b < n) bvec[b-1] = bvec[b-1] - fraction(1);
-        // solve M x = bvec
         std::vector<fraction> x = solve_linear(M, bvec);
         if (a < n && b < n) return x[a-1] - x[b-1];
         if (a < n && b == n) return x[a-1];
